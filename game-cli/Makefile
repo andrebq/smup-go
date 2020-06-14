@@ -1,7 +1,7 @@
 .PHONY: run
 
 run:
-	go build .
+	go build -x .
 	game-cli
 
 fmt:
