@@ -81,6 +81,7 @@ func run() {
 	game.Root.Add(NewOrigin(axisGizmo))
 	game.Root.Add(NewMousePosition(axisGizmo))
 	game.Root.Add(NewScreenCenter(axisGizmo))
+	game.Root.Add(NewWorldMap())
 	for {
 		win.Clear(colornames.Burlywood)
 		for _, v := range game.Root.Active {
