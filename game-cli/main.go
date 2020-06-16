@@ -1,9 +1,10 @@
 package main
 
 import (
+	"time"
+
 	"github.com/faiface/mainthread"
 	"github.com/faiface/pixel"
-	"github.com/faiface/pixel/imdraw"
 	"github.com/faiface/pixel/pixelgl"
 	"github.com/go-gl/glfw/v3.3/glfw"
 	"golang.org/x/image/colornames"
@@ -41,6 +42,11 @@ type (
 		Node
 		Render(r *RenderContext)
 	}
+
+	ActiveVisual interface {
+		Active
+		Visual
+	}
 )
 
 var (
@@ -70,23 +76,11 @@ func run() {
 		Root: NewContainer(),
 	}
 	en := NewExitNode()
+	axisGizmo := NewAxisGizmo(50)
 	game.Root.Add(en)
-	game.Root.Add(NewLines())
-	fb := pixelgl.NewCanvas(pixel.R(-25, -25, 25, 25))
-	imd := imdraw.New(nil)
-	imd.Color = colornames.Salmon
-	imd.Push(pixel.V(0, 0))
-	imd.Circle(5, 0)
-	imd.Color = colornames.Red
-	imd.Push(pixel.V(-25, 0))
-	imd.Push(pixel.V(25, 0))
-	imd.EndShape = imdraw.SharpEndShape
-	imd.Line(1)
-	imd.Color = colornames.Green
-	imd.Push(pixel.V(0, -25))
-	imd.Push(pixel.V(0, 25))
-	imd.Line(1)
-	imd.Draw(fb)
+	game.Root.Add(NewOrigin(axisGizmo))
+	game.Root.Add(NewMousePosition(axisGizmo))
+	game.Root.Add(NewScreenCenter(axisGizmo))
 	for {
 		win.Clear(colornames.Burlywood)
 		for _, v := range game.Root.Active {
@@ -96,8 +90,6 @@ func run() {
 			Transform: pixel.IM,
 			Target:    win,
 		}
-		fb.Draw(win, pixel.IM.Moved(win.MousePosition()))
-		fb.Draw(win, pixel.IM.Moved(win.Bounds().Center()))
 		for _, v := range game.Root.Visual {
 			v.Render(&ctx)
 		}
@@ -106,7 +98,7 @@ func run() {
 		if en.Quit {
 			return
 		}
-		win.WaitInput(0)
+		win.WaitInput(time.Second / 24)
 	}
 }
 
