@@ -1,13 +1,11 @@
 package main
 
 import (
-	"time"
-
+	"github.com/andrebq/smup-go/game-cli/theme"
 	"github.com/faiface/mainthread"
 	"github.com/faiface/pixel"
 	"github.com/faiface/pixel/pixelgl"
 	"github.com/go-gl/glfw/v3.3/glfw"
-	"golang.org/x/image/colornames"
 )
 
 type (
@@ -21,11 +19,6 @@ type (
 
 	Node interface {
 		ID() uint64
-	}
-
-	Container struct {
-		Active map[uint64]Active
-		Visual map[uint64]Visual
 	}
 
 	RenderContext struct {
@@ -64,11 +57,13 @@ func run() {
 		panic(err)
 	}
 	win, err := pixelgl.NewWindow(pixelgl.WindowConfig{
-		VSync:     true,
-		Title:     "Hello world",
-		Bounds:    pixel.R(-400, -300, 400, 300),
-		Resizable: true,
+		VSync:       true,
+		Undecorated: true,
+		Title:       "Hello world",
+		Bounds:      pixel.R(-400, -300, 400, 300),
+		Resizable:   true,
 	})
+	win.SetCursorVisible(false)
 	if err != nil {
 		panic(err)
 	}
@@ -76,30 +71,25 @@ func run() {
 		Root: NewContainer(),
 	}
 	en := NewExitNode()
-	axisGizmo := NewAxisGizmo(50)
+	// axisGizmo := NewAxisGizmo(50)
 	game.Root.Add(en)
-	game.Root.Add(NewOrigin(axisGizmo))
-	game.Root.Add(NewMousePosition(axisGizmo))
-	game.Root.Add(NewScreenCenter(axisGizmo))
+	//game.Root.Add(NewOrigin(axisGizmo))
+	//game.Root.Add(NewMousePosition(axisGizmo))
+	//game.Root.Add(NewScreenCenter(axisGizmo))
 	game.Root.Add(NewWorldMap())
 	for {
-		win.Clear(colornames.Burlywood)
-		for _, v := range game.Root.Active {
-			v.Update(win)
-		}
+		win.UpdateInput()
+		win.Clear(theme.Base)
+		game.Root.Update(win)
 		ctx := RenderContext{
 			Transform: pixel.IM,
 			Target:    win,
 		}
-		for _, v := range game.Root.Visual {
-			v.Render(&ctx)
-		}
+		game.Root.Render(&ctx)
 		win.SwapBuffers()
-
-		if en.Quit {
+		if en.Quit || win.Closed() {
 			return
 		}
-		win.WaitInput(time.Second / 24)
 	}
 }
 
