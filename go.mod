@@ -10,5 +10,7 @@ require (
 	github.com/go-gl/glfw v0.0.0-20200420212212-258d9bec320e
 	github.com/go-gl/glfw/v3.3/glfw v0.0.0-20191125211704-12ad95a8df72
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0
+	github.com/lucasb-eyer/go-colorful v1.0.3
+	github.com/prometheus/client_golang v1.7.0
 	golang.org/x/image v0.0.0-20200609002522-3f4726a040e8
 )

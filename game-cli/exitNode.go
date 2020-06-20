@@ -16,7 +16,8 @@ func NewExitNode() *ExitNode {
 	}
 }
 
-func (e *ExitNode) Update(win *pixelgl.Window) error {
+func (e *ExitNode) Update(uc *UpdateContext) error {
+	win := uc.Window
 	e.Quit = e.Quit ||
 		win.Typed() == "q" ||
 		win.JustPressed(pixelgl.KeyEscape)

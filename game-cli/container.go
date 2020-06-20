@@ -1,7 +1,5 @@
 package main
 
-import "github.com/faiface/pixel/pixelgl"
-
 type (
 	Container struct {
 		nodes map[uint64]Node
@@ -17,10 +15,10 @@ func NewContainer() *Container {
 	}
 }
 
-func (c *Container) Update(win *pixelgl.Window) error {
+func (c *Container) Update(uc *UpdateContext) error {
 	var firstErr error
 	for _, v := range c.active {
-		err := c.nodes[v].(Active).Update(win)
+		err := c.nodes[v].(Active).Update(uc)
 		if err != nil && firstErr == nil {
 			firstErr = err
 		}

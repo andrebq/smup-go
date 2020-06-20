@@ -59,14 +59,14 @@ func (w *WorldMap) Render(rc *RenderContext) {
 	w.currentCellSprite.Draw(rc.Target, rc.Transform.Moved(w.cellIDToPix(w.currentCell)))
 }
 
-func (w *WorldMap) Update(win *pixelgl.Window) error {
+func (w *WorldMap) Update(uc *UpdateContext) error {
 	w.initLock.Do(w.init)
-	if win.Pressed(pixelgl.MouseButton1) {
-		pos := win.MousePosition()
+	if uc.Window.Pressed(pixelgl.MouseButton1) {
+		pos := uc.Window.MousePosition()
 		cellID := w.pixToCellID(pos)
 		w.mapData[cellID] = cell{material: solidMaterial}
 	}
-	w.currentCell = w.pixToCellID(win.MousePosition())
+	w.currentCell = w.pixToCellID(uc.Window.MousePosition())
 	return nil
 }
 
@@ -100,8 +100,10 @@ func solidColorTile(r pixel.Rect, c color.Color) *pixel.Sprite {
 	im.Push(r.Min)
 	im.Push(r.Max)
 	im.Rectangle(0)
+	im.Color = theme.Darken(c, 0.5)
+	im.Push(r.Center())
+	im.Circle(3, 0)
 	im.Draw(cv)
-
 	return pixel.NewSprite(cv, r)
 }
 

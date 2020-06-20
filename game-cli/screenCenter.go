@@ -2,7 +2,6 @@ package main
 
 import (
 	"github.com/faiface/pixel"
-	"github.com/faiface/pixel/pixelgl"
 )
 
 type (
@@ -24,7 +23,7 @@ func (s *screenCenter) Render(rc *RenderContext) {
 	s.gizmo.Draw(rc.Target, pixel.IM.Moved(s.center))
 }
 
-func (s *screenCenter) Update(win *pixelgl.Window) error {
-	s.center = win.Bounds().Center()
+func (s *screenCenter) Update(uc *UpdateContext) error {
+	s.center = uc.Window.Bounds().Center()
 	return nil
 }

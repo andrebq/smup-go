@@ -2,7 +2,6 @@ package main
 
 import (
 	"github.com/faiface/pixel"
-	"github.com/faiface/pixel/pixelgl"
 )
 
 type (
@@ -24,7 +23,7 @@ func (mp *mousePosition) Render(rc *RenderContext) {
 	mp.gizmo.Draw(rc.Target, pixel.IM.Moved(mp.pos))
 }
 
-func (mp *mousePosition) Update(w *pixelgl.Window) error {
-	mp.pos = w.MousePosition()
+func (mp *mousePosition) Update(uc *UpdateContext) error {
+	mp.pos = uc.Window.MousePosition()
 	return nil
 }

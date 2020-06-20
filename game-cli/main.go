@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/andrebq/smup-go/game-cli/metrics"
 	"github.com/andrebq/smup-go/game-cli/theme"
 	"github.com/faiface/mainthread"
 	"github.com/faiface/pixel"
@@ -26,9 +27,14 @@ type (
 		Target    pixel.Target
 	}
 
+	UpdateContext struct {
+		Delta  float64
+		Window *pixelgl.Window
+	}
+
 	Active interface {
 		Node
-		Update(win *pixelgl.Window) error
+		Update(*UpdateContext) error
 	}
 
 	Visual interface {
@@ -53,11 +59,11 @@ func newBaseNode() baseNode {
 func (b baseNode) ID() uint64 { return b.id }
 
 func run() {
+	delta := metrics.GetDelta()
 	if err := glfw.Init(); err != nil {
 		panic(err)
 	}
 	win, err := pixelgl.NewWindow(pixelgl.WindowConfig{
-		VSync:       true,
 		Undecorated: true,
 		Title:       "Hello world",
 		Bounds:      pixel.R(-400, -300, 400, 300),
@@ -73,14 +79,16 @@ func run() {
 	en := NewExitNode()
 	// axisGizmo := NewAxisGizmo(50)
 	game.Root.Add(en)
-	//game.Root.Add(NewOrigin(axisGizmo))
-	//game.Root.Add(NewMousePosition(axisGizmo))
-	//game.Root.Add(NewScreenCenter(axisGizmo))
 	game.Root.Add(NewWorldMap())
+	game.Root.Add(NewPlayer())
 	for {
 		win.UpdateInput()
 		win.Clear(theme.Base)
-		game.Root.Update(win)
+		uc := UpdateContext{
+			Window: win,
+			Delta:  delta.Tick(),
+		}
+		game.Root.Update(&uc)
 		ctx := RenderContext{
 			Transform: pixel.IM,
 			Target:    win,
@@ -94,5 +102,6 @@ func run() {
 }
 
 func main() {
+	go metrics.RunMetricsHTTP()
 	mainthread.Run(run)
 }

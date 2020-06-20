@@ -11,6 +11,12 @@ var (
 
 	// Contour used to render countours
 	Contour = makeSolidRGBA(7, 52, 99)
+
+	// PlayerBody contains the collor used to fill the player's body
+	PlayerBody = makeSolidRGBA(0, 118, 15)
+
+	// PlayerHighlight contains the color used to highlight the players body
+	PlayerHighlight = makeSolidRGBA(7, 150, 25)
 )
 
 func makeSolidRGBA(r, g, b uint8) color.RGBA {
