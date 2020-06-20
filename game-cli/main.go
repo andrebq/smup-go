@@ -84,7 +84,7 @@ func run() {
 		Space: cp.NewSpace(),
 	}
 	game.Space.Iterations = 20
-	game.Space.SetGravity(V(0, -16.0))
+	game.Space.SetGravity(V(0, -100.0))
 
 	en := NewExitNode()
 	game.Root.Add(en)

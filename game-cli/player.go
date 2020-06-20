@@ -40,19 +40,17 @@ func NewPlayer(initialPos pixel.Vec) Node {
 func (p *player) Update(uc *UpdateContext) error {
 	p.runInit.Do(p.init)
 	if p.invalidBody.Refresh() {
-		println("============================== body")
 		p.computeBody(uc)
 	}
 	p.pos = helper.ToVec(p.body.Position())
 	var dir pixel.Vec
-	dir.Y = -1
 	if uc.Window.Pressed(pixelgl.KeyLeft) {
 		dir.X = -1
 	}
 	if uc.Window.Pressed(pixelgl.KeyRight) {
 		dir.X = 1
 	}
-	p.body.SetVelocity(p.speed.X*dir.X, p.speed.Y*dir.Y)
+	p.body.ApplyImpulseAtLocalPoint(helper.ToVector(dir.Scaled(100)), cp.Vector{})
 	return nil
 }
 
@@ -61,10 +59,14 @@ func (p *player) Render(rc *RenderContext) {
 }
 
 func (p *player) computeBody(uc *UpdateContext) {
-	body := uc.Space.AddBody(cp.NewKinematicBody())
+	body := uc.Space.AddBody(cp.NewBody(1, cp.INFINITY))
+	body.SetVelocityUpdateFunc(func(body *cp.Body, gravity cp.Vector, damping, dt float64) {
+		cp.BodyUpdateVelocity(body, gravity, 0.9, dt)
+	})
 	body.SetPosition(helper.ToVector(p.pos))
 
-	uc.Space.AddShape(cp.NewBox(body, p.shape.W(), p.shape.H(), 0))
+	shape := uc.Space.AddShape(cp.NewBox(body, p.shape.W(), p.shape.H(), 0))
+	shape.SetFriction(0.7)
 	p.body = body
 }
 
