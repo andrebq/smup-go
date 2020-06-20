@@ -7,11 +7,15 @@ import (
 	"github.com/faiface/pixel"
 	"github.com/faiface/pixel/pixelgl"
 	"github.com/go-gl/glfw/v3.3/glfw"
+	"github.com/jakecoffman/cp"
+
+	. "github.com/andrebq/smup-go/game-cli/helper"
 )
 
 type (
 	Game struct {
-		Root *Container
+		Root  *Container
+		Space *cp.Space
 	}
 
 	baseNode struct {
@@ -30,6 +34,7 @@ type (
 	UpdateContext struct {
 		Delta  float64
 		Window *pixelgl.Window
+		Space  *cp.Space
 	}
 
 	Active interface {
@@ -67,6 +72,7 @@ func run() {
 		Undecorated: true,
 		Title:       "Hello world",
 		Bounds:      pixel.R(-400, -300, 400, 300),
+		VSync:       true,
 		Resizable:   true,
 	})
 	win.SetCursorVisible(false)
@@ -74,20 +80,25 @@ func run() {
 		panic(err)
 	}
 	game := Game{
-		Root: NewContainer(),
+		Root:  NewContainer(),
+		Space: cp.NewSpace(),
 	}
+	game.Space.Iterations = 20
+	game.Space.SetGravity(V(0, -16.0))
+
 	en := NewExitNode()
-	// axisGizmo := NewAxisGizmo(50)
 	game.Root.Add(en)
 	game.Root.Add(NewWorldMap())
-	game.Root.Add(NewPlayer())
+	game.Root.Add(NewPlayer(pixel.V(0, 200)))
 	for {
 		win.UpdateInput()
 		win.Clear(theme.Base)
 		uc := UpdateContext{
 			Window: win,
 			Delta:  delta.Tick(),
+			Space:  game.Space,
 		}
+		uc.Space.Step(delta.Value())
 		game.Root.Update(&uc)
 		ctx := RenderContext{
 			Transform: pixel.IM,

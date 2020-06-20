@@ -18,6 +18,7 @@ type (
 
 	Delta interface {
 		Tick() float64
+		Value() float64
 	}
 )
 
@@ -41,6 +42,10 @@ func (d *delta) Tick() float64 {
 	d.delta = now.Sub(d.lastTick).Seconds()
 	d.lastTick = now
 	d.hist.Observe(d.delta)
+	return d.delta
+}
+
+func (d *delta) Value() float64 {
 	return d.delta
 }
 

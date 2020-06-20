@@ -3,10 +3,12 @@ package main
 import (
 	"sync"
 
+	"github.com/andrebq/smup-go/game-cli/helper"
 	"github.com/andrebq/smup-go/game-cli/theme"
 	"github.com/faiface/pixel"
 	"github.com/faiface/pixel/imdraw"
 	"github.com/faiface/pixel/pixelgl"
+	"github.com/jakecoffman/cp"
 )
 
 type (
@@ -17,27 +19,40 @@ type (
 		sprite  *pixel.Sprite
 		pos     pixel.Vec
 		speed   pixel.Vec
+		shape   pixel.Rect
+
+		invalidBody helper.DirtyFlag
+		body        *cp.Body
 	}
 )
 
 // NewPlayer returns an entity which is controlled by the player
-func NewPlayer() Node {
+func NewPlayer(initialPos pixel.Vec) Node {
 	return &player{
-		baseNode: newBaseNode(),
-		speed:    pixel.V(1000, 1000),
+		baseNode:    newBaseNode(),
+		speed:       pixel.V(100, 100),
+		pos:         initialPos,
+		shape:       pixel.R(-8, 0, 8, 32),
+		invalidBody: true,
 	}
 }
 
 func (p *player) Update(uc *UpdateContext) error {
 	p.runInit.Do(p.init)
+	if p.invalidBody.Refresh() {
+		println("============================== body")
+		p.computeBody(uc)
+	}
+	p.pos = helper.ToVec(p.body.Position())
 	var dir pixel.Vec
+	dir.Y = -1
 	if uc.Window.Pressed(pixelgl.KeyLeft) {
 		dir.X = -1
 	}
 	if uc.Window.Pressed(pixelgl.KeyRight) {
 		dir.X = 1
 	}
-	p.pos.X += p.speed.X * dir.X * uc.Delta
+	p.body.SetVelocity(p.speed.X*dir.X, p.speed.Y*dir.Y)
 	return nil
 }
 
@@ -45,8 +60,16 @@ func (p *player) Render(rc *RenderContext) {
 	p.sprite.Draw(rc.Target, rc.Transform.Moved(p.pos))
 }
 
+func (p *player) computeBody(uc *UpdateContext) {
+	body := uc.Space.AddBody(cp.NewKinematicBody())
+	body.SetPosition(helper.ToVector(p.pos))
+
+	uc.Space.AddShape(cp.NewBox(body, p.shape.W(), p.shape.H(), 0))
+	p.body = body
+}
+
 func (p *player) init() {
-	r := pixel.R(-8, 0, 8, 32)
+	r := p.shape
 	pW := r.W() * 0.1
 	pH := r.H() * 0.8
 	cv := pixelgl.NewCanvas(r)
